@@ -42,7 +42,7 @@ contract SimpleBank {
     /* Use the appropriate global variable to get the sender of the transaction */
     constructor() public {
         /* Set the owner to the creator of this contract */
-        owner = msg.sender
+        owner = msg.sender;
     }
 
     // Fallback function - Called if other functions don't match call or
@@ -67,6 +67,9 @@ contract SimpleBank {
     /// @return The users enrolled status
     // Emit the appropriate event
     function enroll() public returns (bool){
+        enrolled[msg.sender] = true;
+        emit LogEnrolled(msg.sender);
+        return enrolled[msg.sender];
     }
 
     /// @notice Deposit ether into bank
@@ -75,9 +78,14 @@ contract SimpleBank {
     // Use the appropriate global variables to get the transaction sender and value
     // Emit the appropriate event    
     // Users should be enrolled before they can make deposits
-    function deposit() public returns (uint) {
+    function deposit() public payable returns (uint) {
         /* Add the amount to the user's balance, call the event associated with a deposit,
           then return the balance of the user */
+        if(enrolled[msg.sender] = true) {
+            balances[msg.sender] += msg.value;
+            emit LogDepositMade(msg.sender, balances[msg.sender]);
+            return balances[msg.sender];
+        }
     }
 
     /// @notice Withdraw ether from bank
@@ -90,6 +98,11 @@ contract SimpleBank {
            Subtract the amount from the sender's balance, and try to send that amount of ether
            to the user attempting to withdraw. 
            return the user's balance.*/
+        if(withdrawAmount <= balances[msg.sender]) {
+            balances[msg.sender] -= withdrawAmount;
+            emit LogWithdrawal(msg.sender, withdrawAmount, balances[msg.sender]);
+            return balances[msg.sender];
+        }
     }
 
 }
